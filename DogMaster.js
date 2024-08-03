@@ -6,11 +6,12 @@
 */
 
 const player = "p"
-const sausage = "s"
 const bowl = "b"
+
+const sausage = "s"
 const ham = "h"
-const chocolate = "c"
 const bone = "n"
+const chocolate = "c"
 
 const tileLeft = "Q"
 const tileRight = "W"
@@ -27,8 +28,8 @@ const button5 = "5"
 const button6 = "6"
 const button7 = "7"
 const button8 = "8"
-const button9 = "9"
-const button10 = "0"
+const lifeIndicator = "9"
+const life = "0"
 const button11 = "-"
 
 setLegend(
@@ -70,6 +71,10 @@ C3233C333CCC....
 ................
 ................
 ................
+................
+................
+................
+................
 ...CCCCCCCCCC...
 ..CCFFFFFFFFCC..
 .CFFFFFFFFFFFFC.
@@ -78,11 +83,7 @@ C3233C333CCC....
 .CF9F9F9F9F229C.
 .C9F9F9F9F9F9FC.
 ..C9F9F9F9F9FC..
-...CCCCCCCCCC...
-................
-................
-................
-................`],
+...CCCCCCCCCC...`],
   [ham, bitmap`
 ................
 ................
@@ -342,25 +343,41 @@ FFFFFFFFFFFFFFF0
 6666666666666666`],
   [button7, bitmap`.`],
   [button8, bitmap`.`],
-  [button9, bitmap`.`],
-  [button10, bitmap`
+  [lifeIndicator, bitmap`
+6666666666666666
+6666666666666666
+6668886666888666
+6683338668333866
+6833323883322386
+6833332333332386
+8333333333333238
+8333333333333338
+8333323333233338
+6833332222333386
+6833323333233386
+6683333333333866
+6668333333338666
+6666883333886666
+6666668338666666
+6666666886666666`],
+  [life, bitmap`
 ................
 ................
-................
-................
-................
-................
-................
-................
-................
-................
-................
-................
-................
-................
-................
-................`],
-    [button11, bitmap`
+...888....888...
+..83338..83338..
+.83332388332238.
+.83333233333238.
+8333333333333238
+8333333333333338
+8333323333233338
+.83333222233338.
+.83332333323338.
+..833333333338..
+...8333333338...
+....88333388....
+......8338......
+.......88.......`],
+  [button11, bitmap`
 6666666666666660
 6666666666666660
 6666666666666660
@@ -377,9 +394,15 @@ FFFFFFFFFFFFFFF0
 66666666FFFF6660
 6666666666666660
 6666666666666660`],
+  // Others
 )
 
-setSolids([tileLeft, tileRight, tileUp, tileDown, tileCorner, tileOrnament])
+const fallingObjects = [sausage, ham, bone, chocolate, life]
+
+setSolids([
+  tileLeft, tileRight, tileUp, tileDown, tileCorner, tileOrnament,
+  button1, button2, button3, button4, button5, button6, button7, button8, lifeIndicator, button11,
+])
 
 const melody = tune`
 375,
@@ -400,6 +423,8 @@ const melody = tune`
 375: E4~375,
 6000`
 
+// playTune(melody, Infinity)
+
 const melody2 = tune`
 300: C5^300,
 300: D5^300,
@@ -418,20 +443,59 @@ const melody2 = tune`
 5400`
 
 const soundFalling = tune`
-162.16216216216216: F5~162.16216216216216 + E5-162.16216216216216,
-5027.027027027027`
+162.16216216216216: E5^162.16216216216216 + A5~162.16216216216216,
+162.16216216216216: A5~162.16216216216216,
+162.16216216216216: A5~162.16216216216216,
+162.16216216216216: A5~162.16216216216216,
+162.16216216216216: E5^162.16216216216216 + A5~162.16216216216216,
+162.16216216216216: A5~162.16216216216216,
+162.16216216216216: A5~162.16216216216216,
+162.16216216216216: A5~162.16216216216216,
+162.16216216216216: E5^162.16216216216216 + A5~162.16216216216216,
+3729.7297297297296`
+
+
+const soundDogMove = tune`
+78.94736842105263: A5-78.94736842105263,
+78.94736842105263: B5-78.94736842105263,
+2368.4210526315787`
+const sound3 = tune`
+500: C5/500 + A4~500,
+500: B4/500 + G4~500,
+500: G4/500 + E4~500,
+500: F4/500 + D4~500,
+500: E4~500,
+500: D4~500,
+500: E4~500,
+500: D4~500,
+12000`
+const sound4 = tune`
+68.3371298405467: D5-68.3371298405467,
+68.3371298405467: E5-68.3371298405467,
+68.3371298405467: F5-68.3371298405467,
+68.3371298405467: G5-68.3371298405467,
+68.3371298405467: A5-68.3371298405467,
+68.3371298405467: B5-68.3371298405467,
+1776.765375854214`
+const sound5 = tune`...`
+const sound6 = tune`...`
+const sound7 = tune`...`
+const sound8 = tune`...`
+const sound9 = tune`...`
+const sound10 = tune`...`
+
 
 let level = 0
 const levels = [
   map`
-3EEEEEEEE4
-Q....sQ11W
-Q....nQ11W
-Q....hQ16W
-Q....nQ61-
-Q....sQ16W
-Q...pbQ11W
-TRRRRRRRR5`]
+3EEEEEEEEE4
+Q.....Q111W
+Q.....Q999W
+Q.....Q111W
+Q.....Q161W
+Q.....Q616W
+Q...pbQ161W
+TRRRRRRRRR5`]
 
 setMap(levels[level])
 
@@ -439,8 +503,47 @@ setPushables({
   [player]: []
 })
 
-onInput("s", () => {
-  getFirst(player).y += 1
+
+let score = 0;
+addText(`Score: ${score}`, {
+  x: 2,
+  y: 1,
+  color: color`3`
+})
+
+
+// Move left
+onInput("a", () => {
+  const _player = getFirst(player)
+  const _bowl = getFirst(bowl)
+
+  if(_bowl.x === 1)
+    return;
+  
+  _player.x -= 1
+  _bowl.x -= 1
+
+  if(_player.x <= 0)
+    _player.x = 2
+
+  playTune(soundDogMove);
+})
+
+// Move right
+onInput("d", () => {
+  const _player = getFirst(player)
+  const _bowl = getFirst(bowl)
+
+  if(_bowl.x === 5)
+    return;
+
+  _player.x += 1
+  _bowl.x += 1
+
+  if(_player.x === 6)
+    _player.x = 4;
+
+  playTune(soundDogMove);
 })
 
 afterInput(() => {
