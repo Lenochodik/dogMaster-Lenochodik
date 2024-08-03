@@ -1,10 +1,24 @@
 /*
-@title: 
-@author: 
+@title: DogMaster
+@author: Lenochodik
 @tags: []
 @addedOn: 2024-00-00
 */
 
+// = Helper functions ==============================
+// From: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math/random
+function getRandomInt(min, max) {
+  const minCeiled = Math.ceil(min)
+  const maxFloored = Math.floor(max)
+  return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled) // The maximum is exclusive and the minimum is inclusive
+}
+
+function getRandomItem(arr) {
+  return arr[getRandomInt(0, arr.length)]
+}
+// =================================================
+
+// = Types =========================================
 const player = "p"
 const bowl = "b"
 
@@ -31,6 +45,7 @@ const button8 = "8"
 const lifeIndicator = "9"
 const life = "0"
 const button11 = "-"
+// =================================================
 
 setLegend(
   [player, bitmap`
@@ -482,7 +497,10 @@ const sound6 = tune`...`
 const sound7 = tune`...`
 const sound8 = tune`...`
 const sound9 = tune`...`
-const sound10 = tune`...`
+const soundCollect = tune`
+83.33333333333333: E5^83.33333333333333,
+83.33333333333333: F5^83.33333333333333,
+2500`
 
 
 let level = 0
@@ -495,7 +513,8 @@ Q.....Q111W
 Q.....Q161W
 Q.....Q616W
 Q...pbQ161W
-TRRRRRRRRR5`]
+TRRRRRRRRR5`
+]
 
 setMap(levels[level])
 
@@ -505,43 +524,90 @@ setPushables({
 
 
 let score = 0;
-addText(`Score: ${score}`, {
-  x: 2,
-  y: 1,
-  color: color`3`
-})
+
+function drawScoreText() {
+  clearText()
+  addText(`Score: ${score}`, {
+    x: 2,
+    y: 1,
+    color: color`3`
+  })
+}
+drawScoreText()
+
+
+const screenMinX = 1
+const screenMaxX = 5
+
+const screenMinY = 1
+const screenMaxY = 6
+
+const goodObjectScore = 10
+
+const playerObject = getFirst(player)
+const bowlObject = getFirst(bowl)
+
+
+setInterval(() => {
+  // Move all falling objects down  
+  for (const _type of fallingObjects) {
+    const _objects = getAll(_type)
+    for (const _object of _objects) {
+      _object.y += 1
+
+      // Object has fallen all the way down
+      if (_object.y === screenMaxY) {
+        if(_object.x === playerObject.x) {
+        }
+
+        if(_object.x === bowlObject.x) {
+          score += goodObjectScore
+          playTune(soundCollect)
+          drawScoreText()
+        }
+
+        _object.remove()
+      }
+    }
+  }
+
+  // Generate new falling object
+  const newFallingObject = getRandomItem(fallingObjects)
+  addSprite(
+    getRandomInt(screenMinX, screenMaxX + 1),
+    screenMinY,
+    newFallingObject
+  )
+}, 1000)
+
+
+
 
 
 // Move left
 onInput("a", () => {
-  const _player = getFirst(player)
-  const _bowl = getFirst(bowl)
-
-  if(_bowl.x === 1)
+  if (bowlObject.x === screenMinX)
     return;
-  
-  _player.x -= 1
-  _bowl.x -= 1
 
-  if(_player.x <= 0)
-    _player.x = 2
+  playerObject.x -= 1
+  bowlObject.x -= 1
+
+  if (playerObject.x < screenMinX)
+    playerObject.x = screenMinX + 1
 
   playTune(soundDogMove);
 })
 
 // Move right
 onInput("d", () => {
-  const _player = getFirst(player)
-  const _bowl = getFirst(bowl)
-
-  if(_bowl.x === 5)
+  if (bowlObject.x === screenMaxX)
     return;
 
-  _player.x += 1
-  _bowl.x += 1
+  playerObject.x += 1
+  bowlObject.x += 1
 
-  if(_player.x === 6)
-    _player.x = 4;
+  if (playerObject.x === screenMaxX + 1)
+    playerObject.x = screenMaxX - 1;
 
   playTune(soundDogMove);
 })
