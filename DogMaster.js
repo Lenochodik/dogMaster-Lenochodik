@@ -1,7 +1,4 @@
 /*
-First time? Check out the tutorial game:
-https://sprig.hackclub.com/gallery/getting_started
-
 @title: 
 @author: 
 @tags: []
@@ -382,11 +379,47 @@ FFFFFFFFFFFFFFF0
 6666666666666660`],
 )
 
-setSolids(
-[]
-)
+setSolids([tileLeft, tileRight, tileUp, tileDown, tileCorner, tileOrnament])
 
+const melody = tune`
+375,
+375: C5^375 + E4~375,
+375: C5^375 + G4~375,
+375: C5^375 + E4~375,
+375: G4^375,
+375: A4^375 + E4~375,
+375: A4^375 + G4~375,
+375: G4^375 + E4~375,
+375,
+375: E5^375 + E4~375,
+375: E5^375 + G4~375,
+375: D5^375 + E4~375,
+375: D5^375,
+375: C5^375 + E4~375,
+375: G4~375,
+375: E4~375,
+6000`
 
+const melody2 = tune`
+300: C5^300,
+300: D5^300,
+300: E5^300,
+300: F5^300,
+300: G5^300,
+300: E5^300,
+300: F5^300,
+300: A5^300,
+300,
+300: G5^300,
+300,
+300: E5^300,
+300,
+300: C5^300,
+5400`
+
+const soundFalling = tune`
+162.16216216216216: F5~162.16216216216216 + E5-162.16216216216216,
+5027.027027027027`
 
 let level = 0
 const levels = [
