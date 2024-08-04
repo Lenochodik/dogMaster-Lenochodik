@@ -34,7 +34,7 @@ const tileDown = "R"
 const tileCorner = "T"
 const tileOrnament = "Z"
 
-const button1 = "1"
+const tileEmpty = "1"
 const button2 = "2"
 const button3 = "3"
 const button4 = "4"
@@ -254,8 +254,7 @@ FFFFFFFFFFFFFFFF
 FFFFFFFFFFFFFFFF
 FFFFFFFFFFFFFFFF
 0000000000000000`],
-  // Buttons
-  [button1, bitmap`
+  [tileEmpty, bitmap`
 6666666666666666
 6666666666666666
 6666666666666666
@@ -272,6 +271,7 @@ FFFFFFFFFFFFFFFF
 6666666666666666
 6666666666666666
 6666666666666666`],
+  // Buttons
   [button2, bitmap`
 0000066666666666
 0FFFF66666666666
@@ -434,7 +434,7 @@ const fallingObjects = [sausage, ham, bone, chocolate, life, bonus]
 
 setSolids([
   tileLeft, tileRight, tileUp, tileDown, tileCorner, tileOrnament,
-  button1, button2, button3, button4, button5, button6, button7, button8, lifeIndicator, button11,
+  tileEmpty, button2, button3, button4, button5, button6, button7, button8, lifeIndicator, button11,
 ])
 
 const melody = tune`
@@ -601,8 +601,15 @@ const goodObjectScore = 10
 const playerObject = getFirst(player)
 const bowlObject = getFirst(bowl)
 
+const maxLives = 3
+let lives = maxLives
+const firstLifePosition = [screenMaxX + 2, 2]
 
-setInterval(() => {
+let gameTick = 0
+
+const interval = setInterval(() => {
+  gameTick++;
+  
   // Move all falling objects down  
   for (const _type of fallingObjects) {
     const _objects = getAll(_type)
@@ -610,30 +617,65 @@ setInterval(() => {
       _object.y += 1
 
       // Object has fallen all the way down
-      if (_object.y === screenMaxY) {
+      if (_object.y >= screenMaxY) {
         if(_object.x === bowlObject.x) {
           score += goodObjectScore
           playTune(soundCollect)
           drawScoreText()
+          _object.remove()
+        }
+        else if(_object.x === playerObject.x) {
+          playTune(soundFellOnGroundOrHead)
+          lives--
+          drawLives(lives)
+          
+          _object.remove()
         }
         else {
-          playTune(soundFellOnGroundOrHead)
-          // TODO: remove 1 life
+          playTune(soundFellOnGroundOrHead)          
+          if(_object.y > screenMaxY)
+            _object.remove()
+          else {
+            lives--
+            drawLives(lives)
+          }
         }
-
-        _object.remove()
       }
     }
   }
 
   // Generate new falling object
-  const newFallingObject = getRandomItem(fallingObjects)
-  addSprite(
-    getRandomInt(screenMinX, screenMaxX + 1),
-    screenMinY,
-    newFallingObject
-  )
+  if(gameTick % 2 == 0) {
+    const newFallingObject = getRandomItem(fallingObjects)
+    addSprite(
+      getRandomInt(screenMinX, screenMaxX + 1),
+      screenMinY,
+      newFallingObject
+    )
+  }
 }, 1000)
+
+function drawLives(lives) {
+  for(let x = 0; x < maxLives; x++) {
+    const tmpX = firstLifePosition[0] + x
+    const tmpY = firstLifePosition[1]
+    clearTile(tmpX, tmpY)
+    addSprite(tmpX, tmpY, (x + 1) <= lives ? lifeIndicator : tileEmpty)
+  }
+
+  if(lives === 0) {
+    addText("Game\nOver", {
+      x: screenMaxX + 9,
+      y: firstLifePosition[1] + 1,
+      color: color`0`
+    })
+
+    playTune(soundGameOver)
+
+    clearInterval(interval)
+  }
+}
+drawLives(lives)
 
 
 
@@ -641,7 +683,7 @@ setInterval(() => {
 
 // Move left
 onInput("a", () => {
-  if (bowlObject.x === screenMinX)
+  if (bowlObject.x === screenMinX || lives <= 0)
     return;
 
   playerObject.x -= 1
@@ -655,7 +697,7 @@ onInput("a", () => {
 
 // Move right
 onInput("d", () => {
-  if (bowlObject.x === screenMaxX)
+  if (bowlObject.x === screenMaxX || lives <= 0)
     return;
 
   playerObject.x += 1
