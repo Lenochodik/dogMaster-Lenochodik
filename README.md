@@ -25,3 +25,6 @@ Be quick! This game gets faster as it goes!
 ![DogMaster_2x_bonus](https://github.com/user-attachments/assets/45fc6570-e575-4bae-95d0-41953d569064)
 ![DogMaster_game_over](https://github.com/user-attachments/assets/86e2f6fc-c9c8-4dca-920c-ff8fb9f4b28b)
 
+
+## 🕹 Play the game (Sprig Gallery)
+You can play game in Sprig Gallery: [https://sprig.hackclub.com/gallery/DogMaster](https://sprig.hackclub.com/gallery/DogMaster)
